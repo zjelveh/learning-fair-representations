@@ -2,28 +2,28 @@ from numba.decorators import jit
 import numpy as np
     
 @jit
-def distances(X, v, alpha, N, P, k):
+def distances(X, v, alpha, N, P, K):
     dists = np.zeros((N, P))
     for i in range(N):
         for p in range(P):
-            for j in range(k):    
-                dists[i, j] += (X[i, p] - v[j, p]) * (X[i, p] - v[j, p]) * alpha[p]
+            for k in range(K):    
+                dists[i, k] += (X[i, p] - v[k, p]) * (X[i, p] - v[k, p]) * alpha[p]
     return dists
 
 @jit
-def M_nk(dists, N, k):
-    M_nk = np.zeros((N, k))
-    exp = np.zeros((N, k))
+def M_nk(dists, N, K):
+    M_nk = np.zeros((N, K))
+    exp = np.zeros((N, dists.shape[1]))
     denom = np.zeros(N)
     for i in range(N):
-        for j in range(k):
-            exp[i, j] = np.exp(-1 * dists[i, j])
-            denom[i] += exp[i, j]
-        for j in range(k):
+        for p in range(dists.shape[1]):
+            exp[i, p] = np.exp(-1 * dists[i, p])
+            denom[i] += exp[i, p]
+        for k in range(K):
             if denom[i]:
-                M_nk[i, j] = exp[i, j] / denom[i]
+                M_nk[i, k] = exp[i, k] / denom[i]
             else:
-                M_nk[i, j] = exp[i, j] / 1e-6
+                M_nk[i, k] = exp[i, k] / 1e-6
     return M_nk
 
 @jit    
@@ -36,23 +36,23 @@ def M_k(M_nk, N, k):
     return M_k
 
 @jit        
-def x_n_hat(X, M_nk, v, N, P, k):
+def x_n_hat(X, M_nk, v, N, P, K):
     x_n_hat = np.zeros((N, P))
     L_x = 0.0
     for i in range(N):
         for p in range(P):
-            for j in range(k):
-                x_n_hat[i, p] += M_nk[i, j] * v[j, p]
+            for k in range(K):
+                x_n_hat[i, p] += M_nk[i, k] * v[k, p]
             L_x += (X[i, p] - x_n_hat[i, p]) * (X[i, p] - x_n_hat[i, p])
     return x_n_hat, L_x
 
 @jit
-def yhat(M_nk, y, w, N, k):
+def yhat(M_nk, y, w, N, K):
     yhat = np.zeros(N)
     L_y = 0.0
     for i in range(N):
-        for j in range(k):
-            yhat[i] += M_nk[i, j] * w[j]
+        for k in range(K):
+            yhat[i] += M_nk[i, k] * w[k]
         yhat[i] = 1e-6 if yhat[i] <= 0 else yhat[i]
         yhat[i] = 0.999 if yhat[i] >= 1 else yhat[i]
         L_y += -1 * y[i] * np.log(yhat[i]) - (1.0 - y[i]) * np.log(1.0 - yhat[i])

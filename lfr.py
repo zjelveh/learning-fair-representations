@@ -1,3 +1,5 @@
+#### Warning: Code below is pretty bad, proceed w/ caution. Hope to refactor in the next 5 years.
+
 import pickle
 import os
 import numpy as np
@@ -18,6 +20,7 @@ with open('', 'rb') as f:
             firstLine = False
             continue
         dat.append([float(r) for r in row])
+
 
 print('finished reading data')
 data = np.array(dat)
@@ -52,29 +55,6 @@ ytrain_nonsensitive = y_nonsensitive[idx]
 idx2=indices[3]
 test_nonsensitive = data_nonsensitive[idx2,:]
 ytest_nonsensitive = y_nonsensitive[idx2]
-
-#indices = []
-#
-#idx=np.array(list(set(np.random.randint(0, data_sensitive.shape[0], 3000))))
-#training_sensitive = data_sensitive[idx,:]
-#ytrain_sensitive = y_sensitive[idx]
-#idx2=np.array([i for i in range(data_sensitive.shape[0]) if i not in idx])
-#test_sensitive = data_sensitive[idx2,:]
-#ytest_sensitive = y_sensitive[idx2]
-#indices.append(idx)
-#indices.append(idx2)
-#
-#idx=np.array(list(set(np.random.randint(0, data_nonsensitive.shape[0], 6000))))
-#training_nonsensitive = data_nonsensitive[idx,:]
-#ytrain_nonsensitive = y_nonsensitive[idx]
-#idx2=np.array([i for i in range(data_nonsensitive.shape[0]) if i not in idx])
-#test_nonsensitive = data_nonsensitive[idx2,:]
-#ytest_nonsensitive = y_nonsensitive[idx2]
-#indices.append(idx)
-#indices.append(idx2)
-# 
-##with open('d:/dropbox/crime_lab_ny/fair_algorithms/data/indices_zemel.csv', 'wb') as f:
-##  pickle.dump(indices, f)
 
 training = np.concatenate((training_sensitive, training_nonsensitive))
 ytrain = np.concatenate((ytrain_sensitive, ytrain_nonsensitive))
